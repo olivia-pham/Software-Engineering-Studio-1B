@@ -103,5 +103,6 @@ void TaintGraphTraversal::readSrcSnkFromFile(const string& filename){
 /// return true if actualRet is aliased with any parameter at the snk node (e.g., via ander->alias(..,..))
 bool TaintGraphTraversal::aliasCheck(const CallBlockNode *src, const CallBlockNode *snk)
 {
-    return true;
+    if (alias(src, snk))
+        return true;
 }
