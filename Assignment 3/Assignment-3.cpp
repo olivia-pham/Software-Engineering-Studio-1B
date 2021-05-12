@@ -43,28 +43,25 @@ void AndersenPTA::solveWorklist(){
         NodeID nodeId = popFromWorklist();   
         ConstraintNode* node = consCG->getConstraintNode(nodeId);
                                
-        for (PointsTo::iterator piter = getPts(nodeId).begin(), epiter =
-                getPts(nodeId).end(); piter != epiter; ++piter){   
-            NodeID ptd = *piter;  
+        for (PointsTo::iterator ptsIt = getPts(nodeId).begin(), ptsEit = getPts(nodeId).end(); ptsIt != ptsEit; ++ptsIt){   
             for (ConstraintEdge* e : node->getStoreInEdges()){ //store rule 
                 if (NodeID src = e->getSrcID())
-                    addCopyEdge(src, ptd); 
+                    addCopyEdge(src, *ptsIt); //add copy rule
                     pushIntoWorklist(e->getSrcID());
             }
 
             for (ConstraintEdge* e : node->getLoadOutEdges()){ //load rule 
                 if (NodeID dst = e->getDstID())                    
-                    addCopyEdge(ptd, dst); 
-                    pushIntoWorklist(ptd);
+                    addCopyEdge(*ptsIt, dst); //add copy rule
+                    pushIntoWorklist(*ptsIt);
             }
         }
         
         for (ConstraintEdge* e : node->getDirectOutEdges()){ //copy rule
-            NodeID dst = e->getDstID();
+            NodeID dstPts = e->getDstID();
             const PointsTo& srcPts = getPts(nodeId);
-            bool changed = unionPts(dst, srcPts);
-            if (changed)
-                pushIntoWorklist(dst);
+            if (unionPts(dstPts, srcPts))
+                pushIntoWorklist(dstPts);
         }  
     }
 }
